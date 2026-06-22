@@ -1,0 +1,22 @@
+# Python / uv
+.venv/
+__pycache__/
+*.py[cod]
+
+# mkdocs build output
+/site/
+
+# Unreal Engine (generated — never committed)
+project/Binaries/
+project/Build/
+project/DerivedDataCache/
+project/Intermediate/
+project/Saved/
+project/.vs/
+project/*.sln
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Note: cache/probe.json and uv.lock are intentionally committed.

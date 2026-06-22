@@ -1,0 +1,61 @@
+# mkdocs-material site over the generated skill + reference docs.
+# Build:  uv run ue-mcp-skills build      (wraps `mkdocs build --strict`, output -> ./site)
+# Serve:  uv run ue-mcp-skills build --serve   (http://127.0.0.1:8000)
+#
+# docs_dir is the skill folder itself, so the same Markdown is BOTH the
+# agent-loadable skill and the rendered website — no duplicated content.
+site_name: "UE Official MCP — Skill & Reference"
+site_description: "Generated reference for the official Unreal Engine 5.8 ModelContextProtocol toolsets, plus the ue-official-mcp skill."
+docs_dir: skill
+site_dir: site
+
+theme:
+  name: material
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.details
+
+# The curated domain files and per-toolset raw files are reached via links from
+# the two index pages rather than enumerated in the nav (so regeneration never
+# requires editing this file). Tell --strict those omitted pages are intentional.
+validation:
+  nav:
+    omitted_files: ignore
+  links:
+    not_found: warn
+
+nav:
+  - Skill: SKILL.md
+  - Reference hub: references/index.md
+  - Raw toolset catalog: references/toolsets/index.md
