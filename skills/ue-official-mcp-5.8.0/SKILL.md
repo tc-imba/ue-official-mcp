@@ -63,6 +63,7 @@ which carries every tool's full input/output JSON schema verbatim from `describe
 - **Editor must be running**; calls are serial — one at a time.
 - **`AgentSkillToolset.CreateSkill`/`UpdateSkill` require explicit user permission** (the tools say so)
   — don't author AgentSkills unprompted.
-- **Regenerating this reference**: run `uv run ue-mcp-skills sync` (probes a live editor and rewrites
-  everything under `references/`). The generated files carry a stamp header — do not hand-edit them;
-  edit the domain grouping in `scripts/toolset_map.yaml` instead.
+- **Regenerating this reference**: run `uv run ue-mcp-skills sync --engine <X.Y.Z> --launch`
+  (probes a live editor and rewrites everything under `references/`). Without `--launch`, point
+  `--endpoint` at an already-running editor. The generated files carry a stamp header — do not
+  hand-edit them; edit the domain grouping in `scripts/toolset_map.yaml` instead.
