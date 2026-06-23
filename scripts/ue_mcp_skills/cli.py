@@ -87,7 +87,7 @@ def sync(
 
     if launch:
         typer.echo(f"Launching editor for {paths.PROJECT_UPROJECT.name} (engine UE {ev}) ...")
-        launch_mod.launch_editor(paths.PROJECT_UPROJECT, engine_path, target)
+        launch_mod.launch_editor(paths.PROJECT_UPROJECT, ev, engine_path, target)
         typer.echo(f"Waiting up to {timeout:.0f}s for {target} ...")
         launch_mod.wait_for_endpoint(target, timeout)
 
