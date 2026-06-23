@@ -2,7 +2,7 @@
 	"FileVersion": 3,
 	"EngineAssociation": "5.8",
 	"Category": "",
-	"Description": "Empty UE 5.8 project with the official ModelContextProtocol MCP server enabled (AllToolsets). Used as the probe target for ue-official-mcp-skills. Blueprint-only — no C++, opens with no compile step.",
+	"Description": "Empty UE 5.8 project with the official ModelContextProtocol MCP server enabled (AllToolsets). Used as the probe target for ue-official-mcp. Blueprint-only — no C++, opens with no compile step.",
 	"Plugins": [
 		{
 			"Name": "ModelContextProtocol",

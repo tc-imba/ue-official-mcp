@@ -2,11 +2,13 @@
 # Build:  uv run ue-mcp-skills build      (wraps `mkdocs build --strict`, output -> ./site)
 # Serve:  uv run ue-mcp-skills build --serve   (http://127.0.0.1:8000)
 #
-# docs_dir is the skill folder itself, so the same Markdown is BOTH the
-# agent-loadable skill and the rendered website — no duplicated content.
-site_name: "UE Official MCP — Skill & Reference"
-site_description: "Generated reference for the official Unreal Engine 5.8 ModelContextProtocol toolsets, plus the ue-official-mcp skill."
-docs_dir: skill
+# docs_dir points at the per-engine skill folder, so the same Markdown is BOTH the
+# agent-loadable skill and the rendered website — no duplicated content. Pin to the
+# UE version you want to publish; bump when a new engine snapshot is the "headline".
+# Multi-version site (one URL per engine) is planned via mkdocs-mike.
+site_name: "UE Official MCP — Skill & Reference (UE 5.8)"
+site_description: "Generated reference for the official Unreal Engine 5.8 ModelContextProtocol toolsets, plus the ue-official-mcp-5.8 skill."
+docs_dir: skills/ue-official-mcp-5.8
 site_dir: site
 
 theme:

@@ -1,0 +1,74 @@
+name: Deploy mkdocs site to GitHub Pages
+
+# Builds the mkdocs-material site over the engine version pinned in mkdocs.yml
+# (`docs_dir: skills/ue-official-mcp-<X.Y>`) and publishes it to GitHub Pages.
+#
+# Setup once: repo Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
+#
+# TODO: multi-engine site. When publishing >1 engine version, either
+#   - run mkdocs once per engine with env-substituted docs_dir/site_dir/site_name and
+#     compose the outputs into one site/ + landing index, or
+#   - add mkdocs-mike for a versioned URL scheme. Either way, replace the single
+#     `mkdocs build` step below with a matrix or a script.
+
+on:
+  push:
+    branches: [main]
+    # Skip pure tooling/docs-only changes that don't affect rendered output.
+    paths:
+      - 'skills/**'
+      - 'probes/**'
+      - 'mkdocs.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one in-flight deploy at a time; queue extras instead of cancelling so each
+# main-branch commit is published exactly once.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          cache-dependency-glob: 'uv.lock'
+
+      - name: Install Python deps (frozen against uv.lock)
+        run: uv sync --frozen
+
+      - name: Build mkdocs site
+        run: uv run mkdocs build --strict
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

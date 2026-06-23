@@ -1,14 +1,18 @@
-"""Generate the hybrid reference docs from a probed catalog + the toolset->domain map.
+"""Generate the hybrid reference docs from a probe file + the toolset->domain map.
 
-Outputs (all under skill/references/, all regenerated from scratch each run):
+Inputs:
+  - probes/<X.Y.Z>.json      raw probe dump (one per Epic release; keyed by full version)
+  - scripts/toolset_map.yaml curated toolset -> domain map (shared across engine versions)
+
+Outputs (all under skills/ue-official-mcp-<X.Y>/references/, regenerated from scratch each run):
   - toolsets/<Name>.md       raw per-toolset catalog with full schemas (source of truth)
   - toolsets/index.md        raw catalog index
-  - official-<domain>.md     curated, domain-grouped summaries that link into the raw files
-  - official-uncategorized.md toolsets the server reported but the map doesn't place
+  - <domain>.md              curated, domain-grouped summaries that link into the raw files
+  - uncategorized.md         toolsets the server reported but the map doesn't place
   - index.md                 reference hub with live counts + probe stamp
 
-Deterministic: everything is sorted, and the only timestamp comes from the cache's
-`probed_at`, so regenerating from the same cache yields byte-identical output.
+Deterministic: everything is sorted, and the only timestamp comes from the probe's
+`probed_at`, so regenerating from the same probe yields byte-identical output.
 """
 
 from __future__ import annotations
@@ -114,26 +118,29 @@ def _render_domain(title: str, description: str, toolset_names: list[str],
     return "\n\n".join(blocks) + "\n", len(present), tool_count
 
 
-def regenerate_from_data(data: dict, map_path: Path) -> dict:
-    """Regenerate all reference docs. Returns a summary dict."""
+def regenerate_from_data(data: dict, map_path: Path, engine_version: str) -> dict:
+    """Regenerate all reference docs for one engine version. Returns a summary dict."""
     spec = yaml.safe_load(map_path.read_text(encoding="utf-8")) or {}
     domains = spec.get("domains") or {}
 
     toolsets = data.get("toolsets", []) or []
     by_name = {t.get("name", ""): t for t in toolsets}
 
+    references_dir = paths.references_dir(engine_version)
+    toolsets_dir = paths.toolsets_dir(engine_version)
+
     # Clean slate so removed toolsets never leave orphan files.
-    paths.REFERENCES_DIR.mkdir(parents=True, exist_ok=True)
-    paths.TOOLSETS_DIR.mkdir(parents=True, exist_ok=True)
-    for old in list(paths.REFERENCES_DIR.glob("*.md")):
+    references_dir.mkdir(parents=True, exist_ok=True)
+    toolsets_dir.mkdir(parents=True, exist_ok=True)
+    for old in list(references_dir.glob("*.md")):
         old.unlink()
-    for old in list(paths.TOOLSETS_DIR.glob("*.md")):
+    for old in list(toolsets_dir.glob("*.md")):
         old.unlink()
 
     # 1) Raw per-toolset files.
     for toolset in sorted(toolsets, key=lambda t: t.get("name", "")):
         fname = _raw_filename(toolset.get("name", "unnamed"))
-        (paths.TOOLSETS_DIR / fname).write_text(_render_raw(toolset, data), encoding="utf-8")
+        (toolsets_dir / fname).write_text(_render_raw(toolset, data), encoding="utf-8")
 
     # 2) Curated domain files + collect which toolsets got mapped.
     mapped: set[str] = set()
@@ -144,7 +151,7 @@ def regenerate_from_data(data: dict, map_path: Path) -> dict:
         ts_names = list(dom.get("toolsets", []) or [])
         mapped.update(ts_names)
         md, n_ts, n_tools = _render_domain(title, description, ts_names, by_name, data)
-        (paths.REFERENCES_DIR / f"official-{key}.md").write_text(md, encoding="utf-8")
+        (references_dir / f"{key}.md").write_text(md, encoding="utf-8")
         domain_rows.append((key, title, n_ts, n_tools))
 
     # 3) Uncategorized: probed toolsets absent from the map.
@@ -156,7 +163,7 @@ def regenerate_from_data(data: dict, map_path: Path) -> dict:
         else "All probed toolsets are mapped to a domain.",
         unmapped, by_name, data,
     )
-    (paths.REFERENCES_DIR / "official-uncategorized.md").write_text(uncat_md, encoding="utf-8")
+    (references_dir / "uncategorized.md").write_text(uncat_md, encoding="utf-8")
 
     # 4) Raw catalog index.
     raw_rows = ["| Toolset | Tools | Description |", "|---|---|---|"]
@@ -166,7 +173,7 @@ def regenerate_from_data(data: dict, map_path: Path) -> dict:
             f"| [`{n}`]({_raw_filename(n)}) | {len(toolset.get('tools', []) or [])} "
             f"| {_cell(toolset.get('description'))} |"
         )
-    _write(paths.TOOLSETS_DIR / "index.md", [
+    _write(toolsets_dir / "index.md", [
         _header(data),
         "# Raw toolset catalog",
         f"{len(toolsets)} toolset(s), full schemas verbatim from `describe_toolset`.",
@@ -177,22 +184,24 @@ def regenerate_from_data(data: dict, map_path: Path) -> dict:
     server = data.get("server") or {}
     meta = [
         f"- **Server:** {server.get('name','unknown')} {server.get('version','')}".rstrip(),
+        f"- **Engine version:** UE {engine_version}",
         f"- **Endpoint probed:** `{data.get('endpoint','')}`",
         f"- **Probed at:** {data.get('probed_at','(unknown)')}",
         f"- **Toolsets:** {len(toolsets)} · **Tools:** {data.get('tool_count', sum(len(t.get('tools',[]) or []) for t in toolsets))}",
     ]
     hub_rows = ["| Domain | Toolsets | Tools | Reference |", "|---|---|---|---|"]
     for key, title, n_ts, n_tools in domain_rows:
-        hub_rows.append(f"| {title} | {n_ts} | {n_tools} | [official-{key}.md](official-{key}.md) |")
+        hub_rows.append(f"| {title} | {n_ts} | {n_tools} | [{key}.md]({key}.md) |")
     hub_rows.append(
         f"| _Uncategorized_ | {len(unmapped)} | {uncat_tools} | "
-        f"[official-uncategorized.md](official-uncategorized.md) |"
+        f"[uncategorized.md](uncategorized.md) |"
     )
-    _write(paths.REFERENCES_DIR / "index.md", [
+    _write(references_dir / "index.md", [
         _header(data),
-        "# Official UE MCP — reference",
-        "Generated from a live probe of the official UE 5.8 ModelContextProtocol server. "
-        "Pick a domain, then confirm exact parameter names against the live server before calling.",
+        f"# Official UE {engine_version} MCP — reference",
+        f"Generated from a live probe of the official Unreal Engine {engine_version} "
+        "ModelContextProtocol server. Pick a domain, then call directly from the per-toolset "
+        "raw schemas; only `describe_toolset` if a call returns a schema-shaped error.",
         "\n".join(meta),
         "## Domains",
         "\n".join(hub_rows),
@@ -201,6 +210,7 @@ def regenerate_from_data(data: dict, map_path: Path) -> dict:
     ])
 
     return {
+        "engine_version": engine_version,
         "toolset_count": len(toolsets),
         "tool_count": data.get("tool_count", sum(len(t.get("tools", []) or []) for t in toolsets)),
         "domain_count": len(domain_rows),
@@ -209,6 +219,7 @@ def regenerate_from_data(data: dict, map_path: Path) -> dict:
     }
 
 
-def regenerate_from_cache(cache_path: Path, map_path: Path) -> dict:
-    data = json.loads(cache_path.read_text(encoding="utf-8"))
-    return regenerate_from_data(data, map_path)
+def regenerate_from_probe(probe_path: Path, map_path: Path, engine_version: str) -> dict:
+    """Regenerate docs from a saved probe file (probes/X.Y.Z.json)."""
+    data = json.loads(probe_path.read_text(encoding="utf-8"))
+    return regenerate_from_data(data, map_path, engine_version)

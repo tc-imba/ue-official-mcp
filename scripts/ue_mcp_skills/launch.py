@@ -2,6 +2,10 @@
 
 UE is launched GUI, windowed, and WITHOUT stealing focus (never headless), then we
 poll the MCP endpoint until the handshake succeeds.
+
+The MCP plugin defaults to `bAutoStartServer=false`, so we pass
+`-ModelContextProtocolStartServer` on the command line to force the HTTP server to
+start, and `-ModelContextProtocolPort=N` to align with the endpoint we'll probe.
 """
 
 from __future__ import annotations
@@ -11,6 +15,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from urllib.parse import urlparse
 
 from . import probe as probe_mod
 
@@ -60,10 +65,35 @@ def find_editor(engine: str | None = None) -> Path:
     )
 
 
-def launch_editor(uproject: Path, engine: str | None = None) -> subprocess.Popen:
-    """Start the editor on `uproject`, GUI windowed, without taking focus."""
+def _port_from_endpoint(endpoint: str | None) -> int | None:
+    """Best-effort port extraction from an http://host:port/path endpoint."""
+    if not endpoint:
+        return None
+    try:
+        parsed = urlparse(endpoint)
+        port = parsed.port
+        if port and 1 <= port <= 65535:
+            return port
+    except ValueError:
+        pass
+    return None
+
+
+def launch_editor(
+    uproject: Path, engine: str | None = None, endpoint: str | None = None
+) -> subprocess.Popen:
+    """Start the editor on `uproject`, GUI windowed, without taking focus.
+
+    Always passes `-ModelContextProtocolStartServer` so the MCP HTTP server starts
+    even when the project's `bAutoStartServer` setting is off (it defaults off).
+    If an endpoint with an explicit port is supplied, also passes
+    `-ModelContextProtocolPort=N` so the server binds to that port.
+    """
     exe = find_editor(engine)
-    args = [str(exe), str(uproject)]
+    args = [str(exe), str(uproject), "-ModelContextProtocolStartServer"]
+    port = _port_from_endpoint(endpoint)
+    if port is not None:
+        args.append(f"-ModelContextProtocolPort={port}")
     kwargs: dict = {}
     if sys.platform == "win32":
         startupinfo = subprocess.STARTUPINFO()

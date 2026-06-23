@@ -1,11 +1,11 @@
 [project]
-name = "ue-official-mcp-skills"
+name = "ue-official-mcp"
 version = "0.1.0"
 description = "Regenerate and publish reference docs for the official Unreal Engine 5.8 ModelContextProtocol MCP server by probing a live editor."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "ue-official-mcp-skills contributors" }]
+authors = [{ name = "ue-official-mcp contributors" }]
 keywords = ["unreal-engine", "mcp", "model-context-protocol", "documentation", "ue5"]
 dependencies = [
     "mcp>=1.0",
