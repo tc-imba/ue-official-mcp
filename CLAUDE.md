@@ -60,6 +60,12 @@ padding); `--endpoint` defaults to `$UE_MCP_ENDPOINT` → `http://127.0.0.1:8000
 
 ## Behavioral conventions
 
+- **Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).**
+  Format: `<type>[scope][!]: <description>`. Common types: `feat`, `fix`, `refactor`, `docs`,
+  `chore`, `ci`, `build`, `test`, `perf`, `style`. Breaking changes use `!` after the type
+  (e.g. `refactor!: rename skill folders`) and may include a `BREAKING CHANGE:` footer. Pick the
+  most important type when a commit spans categories; ride-along changes go in the body.
+  Examples in this repo's git history.
 - **Use `git mv`** for renames so history is preserved. Don't `rm + write`.
 - **Don't commit** `.idea/`, `.vscode/`, `site/`, `.venv/`. The `.gitignore` covers them.
 - **`describe_toolset` is a recovery mechanism, not a pre-call confirmation.** When operating
