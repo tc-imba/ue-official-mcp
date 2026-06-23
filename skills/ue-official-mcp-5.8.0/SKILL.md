@@ -1,15 +1,15 @@
 ---
-name: ue-official-mcp-5.8
-description: Use when driving a running Unreal Engine 5.8 editor over the official UE MCP server — to pick the correct toolset and tool for an editor-automation task (spawn/edit actors, Blueprints, materials, Niagara, animation/Sequencer, meshes, GAS, UMG, StateTree, data tables, run automation tests, inspect Slate, etc.). Routes a task to the matching per-domain tool reference under references/ and explains how to call via the Tool Search meta-tools. Schemas are pinned to UE 5.8; use the matching `ue-official-mcp-<version>` skill for other engine versions.
+name: ue-official-mcp-5.8.0
+description: Use when driving a running Unreal Engine 5.8.0 editor over the official UE MCP server — to pick the correct toolset and tool for an editor-automation task (spawn/edit actors, Blueprints, materials, Niagara, animation/Sequencer, meshes, GAS, UMG, StateTree, data tables, run automation tests, inspect Slate, etc.). Routes a task to the matching per-domain tool reference under references/ and explains how to call via the Tool Search meta-tools. Schemas are pinned to UE 5.8.0; use the matching `ue-official-mcp-<X.Y.Z>` skill for other engine versions.
 ---
 
-# ue-official-mcp-5.8 — pick the right UE 5.8 MCP tool
+# ue-official-mcp-5.8.0 — pick the right UE 5.8.0 MCP tool
 
-Operational routing for the **official Unreal Engine 5.8 MCP** server (the `ModelContextProtocol`
+Operational routing for the **official Unreal Engine 5.8.0 MCP** server (the `ModelContextProtocol`
 plugin). This skill is the decision layer + an index into the generated tool catalog under
-`references/`. **All schemas in this skill are captured from UE 5.8** — for other engine versions
-use the matching `ue-official-mcp-<X>` skill, since the MCP plugin is Experimental and surfaces
-drift between releases.
+`references/`. **All schemas in this skill are captured from UE 5.8.0** — for other engine versions
+(including UE 5.8 patch releases) use the matching `ue-official-mcp-<X.Y.Z>` skill, since the MCP
+plugin is Experimental and surfaces drift between releases.
 
 With `AllToolsets` enabled, the server exposes **dozens of toolsets / hundreds of tools** over HTTP
 (streamable, default `http://127.0.0.1:8000/mcp`). It requires the editor running and runs

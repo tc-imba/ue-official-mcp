@@ -63,36 +63,33 @@ worth re-checking if Epic changes error formatting.
 
 ```
 ue-official-mcp/
-├─ skills/                          # one folder per engine version — the portable skill artifacts
-│  └─ ue-official-mcp-5.8/          # drop into .claude/skills/ as-is
-│     ├─ SKILL.md                   #   routing layer (frontmatter name: ue-official-mcp-5.8)
-│     └─ references/                #   GENERATED — do not hand-edit
-│        ├─ index.md                #     reference hub + live counts/probe stamp
-│        ├─ <domain>.md             #     curated domain files (grouped per scripts/toolset_map.yaml)
-│        ├─ uncategorized.md        #     safety net for toolsets not yet in the map
-│        └─ toolsets/<Name>.md      #     raw per-toolset catalog (full schemas) = source of truth
-├─ probes/                          # raw probe dumps — one per Epic release (5.8.0, 5.8.1, 5.9.0…)
+├─ skills/                            # one folder per engine version — the portable skill artifacts
+│  └─ ue-official-mcp-5.8.0/          # drop into .claude/skills/ as-is
+│     ├─ SKILL.md                     #   routing layer (frontmatter name: ue-official-mcp-5.8.0)
+│     └─ references/                  #   GENERATED — do not hand-edit
+│        ├─ index.md                  #     reference hub + live counts/probe stamp
+│        ├─ <domain>.md               #     curated domain files (grouped per scripts/toolset_map.yaml)
+│        ├─ uncategorized.md          #     safety net for toolsets not yet in the map
+│        └─ toolsets/<Name>.md        #     raw per-toolset catalog (full schemas) = source of truth
+├─ probes/                            # raw probe dumps — one per Epic release
 │  └─ 5.8.0.json
-├─ project/                         # empty UE project, MCP enabled — the probe target (version-neutral)
-│  └─ UeMcpProbe.uproject            #   plugins: ModelContextProtocol + AllToolsets
+├─ project/                           # empty UE project, MCP enabled — the probe target (version-neutral)
+│  └─ UeMcpProbe.uproject              #   plugins: ModelContextProtocol + AllToolsets
 ├─ scripts/
-│  ├─ ue_mcp_skills/                 # python package (probe / generate / launch / cli)
-│  └─ toolset_map.yaml               # toolset -> domain mapping (shared across all engine versions)
-└─ mkdocs.yml                       # site build (docs_dir pinned to skills/ue-official-mcp-5.8)
+│  ├─ ue_mcp_skills/                   # python package (probe / generate / launch / cli)
+│  └─ toolset_map.yaml                 # toolset -> domain mapping (shared across all engine versions)
+└─ mkdocs.yml                         # site build (docs_dir pinned to one skill version)
 ```
 
-Two version axes:
+Both probes and skills key on the **full engine version** (`X.Y.Z`). Each Epic release —
+including patch releases like `5.8.1`, `5.8.2` — is a distinct probe **and** a distinct skill.
+The MCP plugin is Experimental, so schemas can drift across patches; pinning the skill to the
+exact version it was probed from makes that explicit and prevents subtle silent breakage when a
+consumer's editor and the cached schemas disagree.
 
-- **Probes** key on the **full** engine version (`X.Y.Z`). Re-probing UE 5.8.1 writes
-  `probes/5.8.1.json` next to `5.8.0.json` — patch-level history is preserved in git for diff and
-  rollback.
-- **Skills** key on **major.minor** (`X.Y`). One skill per minor line. Patch-level re-syncs
-  regenerate `skills/ue-official-mcp-5.8/` from whichever patch probe is in use, so consumers don't
-  reinstall the skill for every Epic hotfix.
-
-When UE 5.9 lands: `uv run ue-mcp-skills sync --engine 5.9.0 --launch` writes `probes/5.9.0.json`
-and `skills/ue-official-mcp-5.9/` next to the 5.8 ones. Tooling stays shared; catalogs are per
-engine line.
+When UE 5.8.1 or 5.9.0 lands: `uv run ue-mcp-skills sync --engine <X.Y.Z> --launch` writes
+`probes/<X.Y.Z>.json` and `skills/ue-official-mcp-<X.Y.Z>/` next to the existing artifacts.
+Tooling stays shared; catalogs are per release.
 
 ## Prerequisites
 
@@ -123,14 +120,15 @@ uv run ue-mcp-skills build --serve
 > `--engine` accepts `X.Y` or `X.Y.Z` (`5.8` is normalized to `5.8.0`). Defaults to
 > `$UE_MCP_ENGINE_VERSION` if set, otherwise `EngineAssociation` from
 > `project/UeMcpProbe.uproject` (currently `5.8` → `5.8.0`). For `generate`, passing only `X.Y`
-> picks the highest-patch probe present (`probes/X.Y.*.json`). The default endpoint is
-> `http://127.0.0.1:8000/mcp` — override with `--endpoint` or `$UE_MCP_ENDPOINT`.
+> picks the highest-patch probe present (`probes/X.Y.*.json`) and writes to its matching
+> skill folder. The default endpoint is `http://127.0.0.1:8000/mcp` — override with `--endpoint`
+> or `$UE_MCP_ENDPOINT`.
 
 ## Commands
 
 | Command | What it does |
 |---|---|
-| `sync` | Probe a running editor (optionally `--launch` it first), write the raw dump to `probes/<X.Y.Z>.json`, then regenerate the matching `skills/ue-official-mcp-<X.Y>/`. |
+| `sync` | Probe a running editor (optionally `--launch` it first), write the raw dump to `probes/<X.Y.Z>.json`, then regenerate the matching `skills/ue-official-mcp-<X.Y.Z>/`. |
 | `generate` | Regenerate the docs **from a saved probe file only** — no editor needed (offline / CI). |
 | `build` | `mkdocs build --strict` over the docs_dir in `mkdocs.yml` into `./site` (`--serve` to preview). |
 
@@ -171,12 +169,12 @@ Re-run `sync` (or `generate`) and the toolset moves into its domain file.
 
 ## The skill
 
-Each `skills/ue-official-mcp-<X>/` directory is a self-contained agent skill: drop it into a
-project's `.claude/skills/ue-official-mcp-<X>/` and an agent gets the routing layer (`SKILL.md`)
-plus the generated reference for that engine version. Multiple versions can coexist —
-`.claude/skills/ue-official-mcp-5.8/` and `.claude/skills/ue-official-mcp-5.9/` are distinct skills
-(the frontmatter `name:` differs), so an agent driving one editor pulls in the matching version
-and isn't confused by drift in the other.
+Each `skills/ue-official-mcp-<X.Y.Z>/` directory is a self-contained agent skill: drop it into a
+project's `.claude/skills/ue-official-mcp-<X.Y.Z>/` and an agent gets the routing layer
+(`SKILL.md`) plus the generated reference for that engine version. Multiple versions can coexist —
+`.claude/skills/ue-official-mcp-5.8.0/` and `.claude/skills/ue-official-mcp-5.8.1/` are distinct
+skills (their frontmatter `name:` differs), so an agent driving one editor pulls in the matching
+version and isn't confused by schema drift in the other.
 
 ## License
 

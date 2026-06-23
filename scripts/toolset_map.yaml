@@ -1,11 +1,12 @@
 # toolset -> curated-domain mapping for ue-official-mcp.
 #
-# `sync` / `generate` group the live toolsets into skills/ue-official-mcp-<engine>/references/<key>.md
-# using this map. Domain order here = doc and nav order. The map is shared across all engine
-# versions; if a future engine adds a toolset, the unmapped-warning surfaces it loudly.
+# `sync` / `generate` group the live toolsets into
+# skills/ue-official-mcp-<X.Y.Z>/references/<key>.md using this map. Domain order here = doc and
+# nav order. The map is shared across all engine versions; if a future engine adds a toolset,
+# the unmapped-warning surfaces it loudly.
 #
 # A toolset the server reports that is NOT listed here is not dropped: it lands in
-# skills/ue-official-mcp-<engine>/references/uncategorized.md and `sync` prints a WARNING naming it.
+# skills/ue-official-mcp-<X.Y.Z>/references/uncategorized.md and `sync` prints a WARNING naming it.
 # Add it under the right domain and re-run sync/generate.
 #
 # Snapshot basis: UE 5.8, AllToolsets (52 toolsets). Keep in sync with the live server.

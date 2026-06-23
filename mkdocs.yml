@@ -6,9 +6,9 @@
 # agent-loadable skill and the rendered website — no duplicated content. Pin to the
 # UE version you want to publish; bump when a new engine snapshot is the "headline".
 # Multi-version site (one URL per engine) is planned via mkdocs-mike.
-site_name: "UE Official MCP — Skill & Reference (UE 5.8)"
-site_description: "Generated reference for the official Unreal Engine 5.8 ModelContextProtocol toolsets, plus the ue-official-mcp-5.8 skill."
-docs_dir: skills/ue-official-mcp-5.8
+site_name: "UE Official MCP — Skill & Reference (UE 5.8.0)"
+site_description: "Generated reference for the official Unreal Engine 5.8.0 ModelContextProtocol toolsets, plus the ue-official-mcp-5.8.0 skill."
+docs_dir: skills/ue-official-mcp-5.8.0
 site_dir: site
 
 theme:

@@ -1,15 +1,16 @@
 """Repo-relative paths.
 
-Two version-axes:
+Both probes and skills key on the **full** engine version (`X.Y.Z`, e.g. `5.8.0`):
 
-- Probe files key on the **full** engine version (`X.Y.Z`, e.g. `5.8.0`): one probe file
-  per Epic release in the `probes/` directory. Re-probing UE 5.8.1 writes a new file
-  alongside the 5.8.0 one; git history preserves the patch-level drift.
-- Skill folders key on the **major.minor** (`X.Y`, e.g. `5.8`): one skill per minor line
-  under `skills/ue-official-mcp-X.Y/`. Patch-level re-syncs overwrite the same folder so
-  consumers don't have to reinstall the skill for every Epic hotfix.
+- `probes/<X.Y.Z>.json`               — one probe per Epic release.
+- `skills/ue-official-mcp-<X.Y.Z>/`   — one skill per Epic release.
 
-`normalize_engine_version` accepts both forms — `"5.8"` is treated as `"5.8.0"`.
+This means each Epic hotfix (`5.8.1`, `5.8.2`, …) is published as a distinct skill
+that consumers install separately. The MCP plugin is Experimental, so schemas can
+drift across patches; tying the skill to the exact version it was probed from makes
+that explicit and prevents subtle silent breakage.
+
+`normalize_engine_version` accepts both forms — `"5.8"` is normalized to `"5.8.0"`.
 """
 
 from __future__ import annotations
@@ -44,13 +45,13 @@ def normalize_engine_version(version: str) -> str:
 
 
 def major_minor(version: str) -> str:
-    """`5.8.0` -> `5.8`. Also fine for already-major.minor input."""
+    """`5.8.0` -> `5.8`. Used for narration only; not used in path resolution."""
     return ".".join(normalize_engine_version(version).split(".")[:2])
 
 
 def skill_name(version: str) -> str:
-    """Skill folder + frontmatter `name:` for a given engine line, e.g. 'ue-official-mcp-5.8'."""
-    return f"ue-official-mcp-{major_minor(version)}"
+    """Skill folder + frontmatter `name:` for a given engine version, e.g. 'ue-official-mcp-5.8.0'."""
+    return f"ue-official-mcp-{normalize_engine_version(version)}"
 
 
 def skill_dir(version: str) -> Path:

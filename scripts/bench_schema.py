@@ -13,7 +13,7 @@ from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 
 ENDPOINT = "http://127.0.0.1:8001/mcp"
-REFS = Path(__file__).resolve().parent.parent / "skills" / "ue-official-mcp-5.8" / "references" / "toolsets"
+REFS = Path(__file__).resolve().parent.parent / "skills" / "ue-official-mcp-5.8.0" / "references" / "toolsets"
 
 # small / medium / large / huge toolset names (by tool count)
 TARGETS = [
