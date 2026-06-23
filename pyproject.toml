@@ -1,18 +1,23 @@
 [project]
 name = "ue-official-mcp"
 version = "0.1.0"
-description = "Regenerate and publish reference docs for the official Unreal Engine 5.8 ModelContextProtocol MCP server by probing a live editor."
+description = "Regenerate and publish reference docs for the official Unreal Engine ModelContextProtocol MCP server by probing a live editor — one skill per Epic release."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "ue-official-mcp contributors" }]
-keywords = ["unreal-engine", "mcp", "model-context-protocol", "documentation", "ue5"]
+keywords = ["unreal-engine", "mcp", "model-context-protocol", "documentation", "ue5", "claude", "agent-skill"]
 dependencies = [
     "mcp>=1.0",
     "pyyaml>=6.0",
     "typer>=0.12",
     "mkdocs-material>=9.5",
 ]
+
+[project.urls]
+Homepage = "https://github.com/tc-imba/ue-official-mcp"
+Repository = "https://github.com/tc-imba/ue-official-mcp"
+Issues = "https://github.com/tc-imba/ue-official-mcp/issues"
 
 [project.scripts]
 ue-mcp-skills = "ue_mcp_skills.cli:app"
