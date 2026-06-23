@@ -40,8 +40,8 @@ GB of RAM).
 
 **5. Versioned, diff-able surface.** The `ModelContextProtocol` plugin shipped in UE 5.8 and is
 flagged Experimental, so toolset/tool surfaces are expected to drift between engine versions. The
-committed `cache/probe.json` plus the generated Markdown make those changes a normal PR diff:
-re-sync against the next engine release and the diff shows exactly what tools were
+committed `probes/<X.Y.Z>.json` files plus the generated Markdown make those changes a normal PR
+diff: re-sync against the next engine release and the diff shows exactly what tools were
 added/removed/renamed and which schemas changed. A self-describing server alone gives you no such
 record.
 
