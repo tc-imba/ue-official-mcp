@@ -13,7 +13,9 @@ name: Deploy mkdocs site to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    # Listen on both default-branch names so renaming master -> main
+    # (or shipping on either) doesn't silently break Pages deploys.
+    branches: [main, master]
     # Skip pure tooling/docs-only changes that don't affect rendered output.
     paths:
       - 'skills/**'
