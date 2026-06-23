@@ -19,4 +19,8 @@ project/*.sln
 .DS_Store
 Thumbs.db
 
-# Note: cache/probe.json and uv.lock are intentionally committed.
+# IDEs
+.idea/
+.vscode/
+
+# Note: probes/*.json and uv.lock are intentionally committed.
