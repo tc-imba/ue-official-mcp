@@ -209,6 +209,26 @@ def regenerate_from_data(data: dict, map_path: Path, engine_version: str) -> dic
         "One file per toolset with full input/output schemas: [toolsets/](toolsets/index.md).",
     ])
 
+    # 6) Site landing page (skill-folder root). The Anthropic skill loader only
+    # cares about SKILL.md + references/; this file exists purely so the mkdocs
+    # site has a working `/` URL on GitHub Pages.
+    tool_count = data.get("tool_count", sum(len(t.get("tools", []) or []) for t in toolsets))
+    landing_blocks = [
+        f"# UE Official MCP — {engine_version}",
+        f"Reference catalog for the official Unreal Engine {engine_version} "
+        "`ModelContextProtocol` server, captured by probing a live editor.",
+        "- **[Skill](SKILL.md)** — routing layer for agents driving the editor.",
+        "- **[Reference hub](references/index.md)** — per-domain tool tables.",
+        "- **[Raw toolset catalog](references/toolsets/index.md)** — full JSON schemas, "
+        "one file per toolset.",
+        f"_{len(toolsets)} toolset(s), {tool_count} tool(s). "
+        f"Probed: {data.get('probed_at','(unknown)')}._",
+        "[Source on GitHub](https://github.com/tc-imba/ue-official-mcp)",
+    ]
+    (paths.skill_dir(engine_version) / "index.md").write_text(
+        "\n\n".join(landing_blocks) + "\n", encoding="utf-8"
+    )
+
     return {
         "engine_version": engine_version,
         "toolset_count": len(toolsets),

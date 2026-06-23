@@ -8,6 +8,10 @@
 # Multi-version site (one URL per engine) is planned via mkdocs-mike.
 site_name: "UE Official MCP — Skill & Reference (UE 5.8.0)"
 site_description: "Generated reference for the official Unreal Engine 5.8.0 ModelContextProtocol toolsets, plus the ue-official-mcp-5.8.0 skill."
+# site_url tells mkdocs the deployment base path. Without it, internal links and
+# Material-theme JS resolve to the domain root (/) instead of /ue-official-mcp/,
+# which breaks the site on GitHub Pages project deployments.
+site_url: https://tc-imba.github.io/ue-official-mcp/
 docs_dir: skills/ue-official-mcp-5.8.0
 site_dir: site
 
@@ -58,6 +62,7 @@ validation:
     not_found: warn
 
 nav:
+  - Home: index.md
   - Skill: SKILL.md
   - Reference hub: references/index.md
   - Raw toolset catalog: references/toolsets/index.md
